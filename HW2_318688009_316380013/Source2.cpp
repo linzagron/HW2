@@ -35,18 +35,18 @@ void testMonomial2() {
 		cout << "Enter a polynomial: " << endl;
 		cin >> p;
 		cout << p << endl;
-		/*cout << "p(0)=" << p(0) << ", p(1)=" << p(1) << ", p(2)=" << p(2) << endl;
+		cout << "p(0)=" << p(0) << ", p(1)=" << p(1) << ", p(2)=" << p(2) << endl;
 		cout << "p[0]=" << p[0] << ", p[1]=" << p[1] << ", p[2]=" << p[2] << ", p[4]=" << p[4] << endl;
-		cout << "p+p=" << p + p << endl;*/
-	} while (1/*p != Monomial(0)*/);
+		cout << "p+p=" << p + p << endl;
+	} while (p != Monomial(0));
 }
 
 int main() {
 	cout << boolalpha;
 	testMonomial2();
 	cout << "Number of Monomials=" << Monomial::getNumberOfMonomials() << endl;
-	//testPolynomial2();
-	//cout << "Number of Monomials=" << Monomial::getNumberOfMonomials() << endl;
+	testPolynomial2();
+	cout << "Number of Monomials=" << Monomial::getNumberOfMonomials() << endl;
 	return 0;
 }
 

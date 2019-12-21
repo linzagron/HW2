@@ -17,10 +17,7 @@ Polynomial::Polynomial()
 
 Polynomial::~Polynomial()
 {
-	while (!isEmpty(polynom))
-	{
-		deleteLast(polynom);
-	}
+	clear();
 	delete polynom;
 }
 
@@ -225,60 +222,6 @@ const Polynomial& Polynomial::operator-(Polynomial const& obj)
 	return *result;
 }
 
-//const Polynomial Polynomial::operator+(Monomial const & obj) const
-//{
-//
-//	node* pointer = polynom->head;
-//	node* temp = NULL;
-//	bool isAddFinished = (obj.getCoefficient() == 0);
-//
-//	while (pointer && !isAddFinished)
-//	{
-//		// check if there is already monom with the same degree in the polynom
-//		if (pointer->value->getDegree() == obj.getDegree())
-//		{
-//			if (pointer->value->getCoefficient() + obj.getCoefficient() == 0)
-//			{
-//				temp = pointer->next;
-//				deleteLink(polynom, pointer);
-//				pointer = temp;
-//			}
-//			else
-//				pointer->value->setCoefficient(pointer->value->getCoefficient() + obj.getCoefficient());
-//
-//			isAddFinished = true;
-//		}
-//		if (pointer)
-//		{
-//			pointer = pointer->next;
-//		}
-//	}
-//
-//	if (!isAddFinished)
-//	{
-//		node* n = allocItem(obj);
-//		insertFirst(polynom, n);
-//	}
-//
-//}
-
-//const Polynomial & Polynomial::operator=(Polynomial const & obj)
-//{
-//	//this-
-//
-//	return *this;
-//}
-
-//const Monomial & Polynomial::operator[](int index)
-//{
-//	if (index >= this->length())
-//	{
-//		cout << "Array index out of bound, exiting";
-//		exit(0);
-//	}
-//	return this->polynom[index];
-//}
-
 void Polynomial::add(const Monomial& monomial)
 {
 	node* pointer = polynom->head;
@@ -310,7 +253,8 @@ void Polynomial::add(const Monomial& monomial)
 	if (!isAddFinished)
 	{
 		node* n = allocItem(monomial);
-		insertFirst(polynom, n);
+		//insertFirst(polynom, n); // to HW1
+		insertLast(polynom, n);	// to HW2
 	}
 }
 
@@ -337,6 +281,19 @@ void Polynomial::print(std::ostream& outStream) const
 	}
 }
 
+void Polynomial::clear() const
+{
+	while (!isEmpty(polynom))
+	{
+		deleteLast(polynom);
+	}
+}
+
+size_t Polynomial::size() const
+{
+	return length(polynom);
+}
+
 std::ostream& operator<<(std::ostream& out, const Polynomial& p)
 {
 	//todo: check if concatanating couts works here
@@ -347,22 +304,43 @@ std::ostream& operator<<(std::ostream& out, const Polynomial& p)
 
 std::istream & operator>>(std::istream & in, Polynomial& p)
 {
-	string tempStr = "";
-	in >> tempStr;
+	p.clear();
+
+	string tempStr;
+	std::getline(in, tempStr);
+
+	tempStr = tempStr.substr(0, tempStr.size() - 1); // excluding ","
 	
 	std::replace(tempStr.begin(), tempStr.end(), '+', ' ');	// replace '+' by ' '
 
-	tempStr = std::regex_replace(tempStr, std::regex("\\-"), " -");	// replace '-' by " -"
+	tempStr = std::regex_replace(tempStr, std::regex("-"), " -");	// replace '-' by " -"
 
-	stringstream ss(tempStr);
 	Monomial tempMonom;
+	string splitedStr;
 
-	while (ss)
+	size_t pos = tempStr.find(' ');
+	while (pos != string::npos)
 	{
+		splitedStr = tempStr.substr(0, pos);
+		tempStr = tempStr.substr(pos+1, tempStr.size()-(pos+1));
+
+		stringstream ss;
+		ss.str(splitedStr);
 		ss >> tempMonom;
+
 		p.add(tempMonom);
+		pos = tempStr.find(' ');
 	}
 
+	if (!tempStr.empty())
+	{
+		stringstream ss;
+		ss.str(tempStr);
+		ss >> tempMonom;
+
+		p.add(tempMonom);
+	}
+	
 	///todo: validation?
 
 	return in;
@@ -466,6 +444,20 @@ bool Polynomial::operator!=(Polynomial const& obj) const
 	return false;
 }
 
+bool Polynomial::operator==(Monomial const& obj) const
+{
+	//  notice that the implementaion defines that empty polynom is equal to Monomial(0)
+	if ((size() == 0 && obj == Monomial(0)) || ((size() == 1) && (obj == *(polynom->head->value))))
+		return true;
+
+	return false;
+}
+
+bool Polynomial::operator!=(Monomial const& obj) const
+{
+	return !(*this == obj);
+}
+
 Polynomial Polynomial::operator-() const &
 {
 	Polynomial result;
@@ -480,7 +472,7 @@ Polynomial Polynomial::operator-() const &
 	return result;
 }
 
-const double& Polynomial::operator()(const double r) const
+const double Polynomial::operator()(const double r) const
 {
 	double result = 0;
 	node* pointerLocal = polynom->head;
@@ -495,3 +487,33 @@ const double& Polynomial::operator()(const double r) const
 	}
 	return result;
 }
+
+const double Polynomial::operator[](const unsigned int d) const
+{
+	node* pointer = this->polynom->head;
+
+	while (pointer)
+	{
+		if (pointer->value->getDegree() == d)
+			return pointer->value->getCoefficient();
+
+		pointer = pointer->next;
+	}
+
+	return 0;
+}
+
+//double& Polynomial::operator[](const unsigned int d)
+//{
+//	node* pointer = this->polynom->head;
+//
+//	while (pointer)
+//	{
+//		if (pointer->value->getDegree() == d)
+//			return *(pointer->value);
+//
+//		pointer = pointer->next;
+//	}
+//
+//	return 0;	// what happen if there is no monom with degree d?
+//}

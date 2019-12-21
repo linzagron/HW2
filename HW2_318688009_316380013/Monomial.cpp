@@ -75,7 +75,7 @@ const Monomial Monomial::operator=(Monomial const& obj)
 
 const Monomial Monomial::operator+(Monomial const& obj) const
 {
-	if (this->getDegree() != obj.getDegree()) return NULL;
+	if (this->getDegree() != obj.getDegree()) return *this;
 
 	Monomial result;
 	result.setCoefficient(this->getCoefficient() + obj.getCoefficient());
@@ -83,10 +83,10 @@ const Monomial Monomial::operator+(Monomial const& obj) const
 
 	return result;
 }
-
+// todo: add ref
 const Monomial Monomial::operator-(Monomial const& obj) const
 {
-	if (this->getDegree() != obj.getDegree()) return NULL;
+	if (this->getDegree() != obj.getDegree()) return *this;
 
 	Monomial result;
 	result.setCoefficient(this->getCoefficient() - obj.getCoefficient());
@@ -94,7 +94,7 @@ const Monomial Monomial::operator-(Monomial const& obj) const
 
 	return result;
 }
-
+// todo: add ref
 const Monomial Monomial::operator*(Monomial const& obj) const
 {
 	Monomial result;
@@ -127,7 +127,7 @@ const Monomial& Monomial::operator+=(const Monomial& obj)
 const Monomial& Monomial::operator*=(const Monomial& obj)
 {
 	this->setCoefficient(this->getCoefficient() * obj.getCoefficient());
-	this->setDegree(this->getDegree() + obj.getCoefficient());
+	this->setDegree(this->getDegree() + obj.getDegree());
 
 	return *this;
 }
@@ -155,7 +155,6 @@ const double& Monomial::operator()(const double r) const
 	return (this->getCoefficient() * pow(r, this->getDegree()));
 }
 
-
 void Monomial::print(std::ostream &outStream) const
 {
 	if (this->getCoefficient() == 0)
@@ -172,13 +171,13 @@ void Monomial::print(std::ostream &outStream) const
 		{
 			if (this->getDegree() == 1)
 			{
-				(this->getCoefficient() == 1) ? outStream << "X"
-					: outStream << this->getCoefficient() << "*X";
+				(this->getCoefficient() == 1) ? outStream << "x"
+					: outStream << this->getCoefficient() << "*x";
 			}
 			else if (this->getDegree() > 1)
 			{
-				(this->getCoefficient() == 1) ? outStream << "X^" << this->getDegree()
-					: outStream << this->getCoefficient() << "*X^" << this->getDegree();
+				(this->getCoefficient() == 1) ? outStream << "x^" << this->getDegree()
+					: outStream << this->getCoefficient() << "*x^" << this->getDegree();
 			}
 		}
 	}
@@ -199,8 +198,8 @@ ostream& operator<<(ostream& out, const Monomial& m)
 
 istream& operator>>(istream& in, Monomial& m)
 {
-	string tempStr = "";
-	in >> tempStr;
+	string tempStr;
+	std::getline(in, tempStr);
 
 	char charsToRemove[] = "^ "; // ignore this characters
 
@@ -216,7 +215,7 @@ istream& operator>>(istream& in, Monomial& m)
 	else
 	{
 		m.coefficient = atoi(tempStr.substr(0, pos).c_str());
-		m.degree = atoi(tempStr.substr(pos+1, tempStr.size()-(pos+1)).c_str());
+		m.degree = (pos == tempStr.size() - 1) ? 1 : atoi(tempStr.substr(pos + 1, tempStr.size() - (pos + 1)).c_str());
 	}
 
 	///todo: validation?
